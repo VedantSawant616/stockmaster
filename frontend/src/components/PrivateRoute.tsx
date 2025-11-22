@@ -5,10 +5,10 @@ interface PrivateRouteProps {
 }
 
 export default function PrivateRoute({ children }: PrivateRouteProps) {
-  const token = localStorage.getItem('token');
+  const user = localStorage.getItem('user');
 
-  if (!token) {
-    return <Navigate to="/login" replace />;
+  if (!user) {
+    return <Navigate to="/register" replace />;
   }
 
   return <>{children}</>;

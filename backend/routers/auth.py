@@ -65,13 +65,20 @@ StockMaster Team
         """
         message.attach(MIMEText(body, "plain"))
         
-        # Use STARTTLS for port 587
-        server = smtplib.SMTP(smtp_host, smtp_port)
-        server.starttls()
-        server.login(smtp_user, smtp_password)
+        # Support both SSL (port 465) and STARTTLS (port 587)
+        if smtp_port == 465:
+            # Use SMTP_SSL for port 465
+            server = smtplib.SMTP_SSL(smtp_host, smtp_port)
+            server.login(smtp_user, smtp_password)
+        else:
+            # Use STARTTLS for port 587
+            server = smtplib.SMTP(smtp_host, smtp_port)
+            server.starttls()
+            server.login(smtp_user, smtp_password)
+        
         server.send_message(message)
         server.quit()
-        print(f"✓ OTP email sent successfully to {email}")
+        print(f"✅ OTP email sent successfully to {email}")
     except Exception as e:
         print(f"⚠️  Failed to send email: {e}")
         print(f"✓ Using console OTP as fallback")

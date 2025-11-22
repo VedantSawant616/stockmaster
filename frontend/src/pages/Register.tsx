@@ -91,11 +91,6 @@ const Register: React.FC = () => {
         {success && (
           <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
             {success}
-            {step === 'otp' && (
-              <p className="text-sm mt-2">
-                💡 <strong>Note:</strong> If email is not configured, check the backend terminal console for the OTP code.
-              </p>
-            )}
           </div>
         )}
 
@@ -201,18 +196,6 @@ const Register: React.FC = () => {
             </div>
           </form>
         )}
-
-        <div className="mt-6 text-center">
-          <p className="text-gray-600 text-sm">
-            Already have an account?{' '}
-            <button
-              onClick={() => navigate('/')}
-              className="text-blue-500 hover:text-blue-700 font-semibold"
-            >
-              Go to Dashboard
-            </button>
-          </p>
-        </div>
       </div>
     </div>
   );

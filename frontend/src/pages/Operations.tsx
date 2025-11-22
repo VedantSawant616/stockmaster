@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Package, ArrowRightLeft, TruckIcon, AlertCircle, Plus } from 'lucide-react';
+import { Package, ArrowRightLeft, TruckIcon, AlertCircle, Plus, X } from 'lucide-react';
 import axios from 'axios';
 import OperationModal from '../components/OperationModal';
 import { updateTransactionStatus } from '../api';
@@ -18,11 +18,29 @@ interface Transaction {
   timestamp: string;
 }
 
+interface WarehouseInventory {
+  warehouse_id: number;
+  warehouse_name: string;
+  total_items: number;
+  total_quantity: number;
+}
+
+interface WarehouseItem {
+  product_name: string;
+  sku: string;
+  category: string;
+  quantity: number;
+}
+
 const Operations = () => {
   const [activeTab, setActiveTab] = useState<'receipt' | 'delivery' | 'transfer' | 'adjustment'>('receipt');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [warehouseInventory, setWarehouseInventory] = useState<WarehouseInventory[]>([]);
+  const [selectedWarehouse, setSelectedWarehouse] = useState<number | null>(null);
+  const [warehouseItems, setWarehouseItems] = useState<WarehouseItem[]>([]);
+  const [itemSearchQuery, setItemSearchQuery] = useState('');
 
   const operationTypes = [
     { id: 'receipt', label: 'Receipts', icon: Package, color: 'bg-green-100 text-green-600' },
@@ -33,6 +51,7 @@ const Operations = () => {
 
   useEffect(() => {
     fetchTransactions();
+    fetchWarehouseInventory();
   }, []);
 
   const fetchTransactions = async () => {
@@ -47,8 +66,28 @@ const Operations = () => {
     }
   };
 
+  const fetchWarehouseInventory = async () => {
+    try {
+      const response = await axios.get(`${API_BASE}/warehouses/inventory`);
+      setWarehouseInventory(response.data);
+    } catch (err) {
+      console.error('Error fetching warehouse inventory:', err);
+    }
+  };
+
+  const fetchWarehouseItems = async (warehouseId: number) => {
+    try {
+      const response = await axios.get(`${API_BASE}/warehouses/${warehouseId}/items`);
+      setWarehouseItems(response.data);
+      setSelectedWarehouse(warehouseId);
+    } catch (err) {
+      console.error('Error fetching warehouse items:', err);
+    }
+  };
+
   const handleOperationSuccess = () => {
     fetchTransactions();
+    fetchWarehouseInventory();
   };
 
   const getFilteredTransactions = () => {
@@ -186,6 +225,127 @@ const Operations = () => {
           );
         })}
       </div>
+
+      {/* Warehouse Inventory Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        {warehouseInventory.map((warehouse) => (
+          <div key={warehouse.warehouse_id} className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800">{warehouse.warehouse_name}</h3>
+                <p className="text-sm text-gray-500 mt-1">Inventory Summary</p>
+              </div>
+              <button
+                onClick={() => fetchWarehouseItems(warehouse.warehouse_id)}
+                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+              >
+                View Items →
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-blue-50 rounded-lg p-4">
+                <p className="text-sm text-gray-600 mb-1">Total Products</p>
+                <p className="text-2xl font-bold text-blue-600">{warehouse.total_items}</p>
+              </div>
+              <div className="bg-green-50 rounded-lg p-4">
+                <p className="text-sm text-gray-600 mb-1">Total Quantity</p>
+                <p className="text-2xl font-bold text-green-600">{warehouse.total_quantity}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Warehouse Items Modal */}
+      {selectedWarehouse !== null && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+            <div className="flex justify-between items-center p-6 border-b">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800">
+                  {warehouseInventory.find(w => w.warehouse_id === selectedWarehouse)?.warehouse_name}
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">Inventory Items</p>
+              </div>
+              <button
+                onClick={() => {
+                  setSelectedWarehouse(null);
+                  setItemSearchQuery('');
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              {/* Search Bar */}
+              <div className="relative mb-4">
+                <Package className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Search items by name, SKU, or category..."
+                  value={itemSearchQuery}
+                  onChange={(e) => setItemSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Items Table */}
+              <div className="overflow-y-auto max-h-[500px]">
+                <table className="w-full text-left">
+                  <thead className="bg-gray-50 sticky top-0">
+                    <tr>
+                      <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Product</th>
+                      <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase">SKU</th>
+                      <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Category</th>
+                      <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Quantity</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {warehouseItems
+                      .filter((item) => {
+                        const query = itemSearchQuery.toLowerCase();
+                        return (
+                          item.product_name.toLowerCase().includes(query) ||
+                          item.sku.toLowerCase().includes(query) ||
+                          item.category.toLowerCase().includes(query)
+                        );
+                      })
+                      .map((item, index) => (
+                        <tr key={index} className="hover:bg-gray-50">
+                          <td className="px-4 py-3 text-sm font-medium text-gray-900">{item.product_name}</td>
+                          <td className="px-4 py-3 text-sm text-gray-600">{item.sku}</td>
+                          <td className="px-4 py-3 text-sm text-gray-600">{item.category}</td>
+                          <td className="px-4 py-3 text-sm">
+                            <span className={`font-semibold ${
+                              item.quantity < 10 ? 'text-red-600' :
+                              item.quantity < 30 ? 'text-yellow-600' : 'text-green-600'
+                            }`}>
+                              {item.quantity}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+                {warehouseItems.filter((item) => {
+                  const query = itemSearchQuery.toLowerCase();
+                  return (
+                    item.product_name.toLowerCase().includes(query) ||
+                    item.sku.toLowerCase().includes(query) ||
+                    item.category.toLowerCase().includes(query)
+                  );
+                }).length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    {itemSearchQuery ? 'No items found matching your search.' : 'No items in this warehouse.'}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Active Tab Content */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">

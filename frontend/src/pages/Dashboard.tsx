@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { TrendingUp, TrendingDown, AlertTriangle, Package } from 'lucide-react';
+import { TrendingUp, TrendingDown, AlertTriangle, Package, TruckIcon, ArrowRightLeft } from 'lucide-react';
 import axios from 'axios';
 
 const API_BASE = 'http://localhost:8000';
@@ -74,12 +74,17 @@ const Dashboard = () => {
 
   const getActivityIcon = (type: string) => {
     switch (type) {
-      case 'receipt': return '📦';
-      case 'delivery': return '🚚';
+      case 'receipt':
+        return <Package className="w-5 h-5 text-green-600" />;
+      case 'delivery':
+        return <TruckIcon className="w-5 h-5 text-blue-600" />;
       case 'transfer_in':
-      case 'transfer_out': return '🔄';
-      case 'adjustment': return '⚠️';
-      default: return '📋';
+      case 'transfer_out':
+        return <ArrowRightLeft className="w-5 h-5 text-purple-600" />;
+      case 'adjustment':
+        return <AlertTriangle className="w-5 h-5 text-red-600" />;
+      default:
+        return <Package className="w-5 h-5 text-gray-600" />;
     }
   };
 
@@ -188,7 +193,9 @@ const Dashboard = () => {
           <div className="space-y-4">
             {recentActivity.map((activity) => (
               <div key={activity.id} className="flex items-start gap-4 p-4 hover:bg-gray-50 rounded-lg transition-colors">
-                <div className="text-2xl">{getActivityIcon(activity.transaction_type)}</div>
+                <div className="p-2 bg-gray-100 rounded-lg flex items-center justify-center">
+                  {getActivityIcon(activity.transaction_type)}
+                </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900">
                     {getActivityDescription(activity)}

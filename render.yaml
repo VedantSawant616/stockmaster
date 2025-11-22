@@ -29,7 +29,6 @@ services:
   - type: web
     name: stockmaster-frontend
     runtime: static
-    region: oregon
     plan: free
     branch: main
     rootDir: frontend

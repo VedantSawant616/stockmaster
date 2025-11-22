@@ -1,5 +1,5 @@
-from .database import SessionLocal, engine, Base
-from . import models
+from database import SessionLocal, engine, Base
+import models
 
 def seed_database():
     """Seed the database with sample electronics warehouse data"""

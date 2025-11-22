@@ -32,13 +32,13 @@ origins = [
     "http://localhost:3000",
 ]
 
-# In production, you can also allow all origins (or be more specific)
+# In production, allow all origins for easier deployment
 if os.getenv("ENVIRONMENT") == "production":
-    origins = ["*"]  # Or specify your Vercel domain
+    origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins if os.getenv("ENVIRONMENT") != "production" else ["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

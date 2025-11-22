@@ -32,11 +32,19 @@ def send_otp_email(email: str, otp: str):
     smtp_password = os.getenv("SMTP_PASSWORD")
     smtp_from = os.getenv("SMTP_FROM", smtp_user)
     
-    # For local development without SMTP configured
-    if not all([smtp_user, smtp_password]):
-        print(f"\n{'='*50}")
-        print(f"📧 OTP for {email}: {otp}")
-        print(f"{'='*50}\n")
+    # Always show OTP in console for development (works without email setup)
+    print(f"\n{'='*60}")
+    print(f"🔐 REGISTRATION OTP")
+    print(f"{'='*60}")
+    print(f"📧 Email: {email}")
+    print(f"🔢 OTP Code: {otp}")
+    print(f"⏰ Valid for: 10 minutes")
+    print(f"{'='*60}\n")
+    
+    # Try to send email if SMTP is configured
+    if not all([smtp_user, smtp_password]) or smtp_user == "your-email@gmail.com":
+        print("ℹ️  Email sending disabled - using console OTP only")
+        print("ℹ️  To enable email: Configure SMTP settings in .env file")
         return
     
     try:
@@ -63,10 +71,10 @@ StockMaster Team
         server.login(smtp_user, smtp_password)
         server.send_message(message)
         server.quit()
-        print(f"✓ OTP email sent to {email}")
+        print(f"✓ OTP email sent successfully to {email}")
     except Exception as e:
-        print(f"Failed to send email: {e}")
-        print(f"[FALLBACK] OTP for {email}: {otp}")
+        print(f"⚠️  Failed to send email: {e}")
+        print(f"✓ Using console OTP as fallback")
 
 @router.post("/register")
 async def register(user_data: UserRegister, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):

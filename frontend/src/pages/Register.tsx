@@ -91,6 +91,11 @@ const Register: React.FC = () => {
         {success && (
           <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
             {success}
+            {step === 'otp' && (
+              <p className="text-sm mt-2">
+                💡 <strong>Note:</strong> If email is not configured, check the backend terminal console for the OTP code.
+              </p>
+            )}
           </div>
         )}
 
@@ -137,8 +142,11 @@ const Register: React.FC = () => {
         ) : (
           <form onSubmit={handleVerifyOTP}>
             <div className="mb-4 text-center">
-              <p className="text-gray-600 mb-4">
+              <p className="text-gray-600 mb-2">
                 We've sent a 6-digit OTP to <strong>{email}</strong>
+              </p>
+              <p className="text-sm text-blue-600 bg-blue-50 p-2 rounded mt-2">
+                💡 <strong>For Local Development:</strong> Check the backend terminal console for your OTP code!
               </p>
             </div>
 

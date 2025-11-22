@@ -1,0 +1,60 @@
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Enum, Float
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+import enum
+from .database import Base
+
+class TransactionType(str, enum.Enum):
+    RECEIPT = "RECEIPT"
+    DELIVERY = "DELIVERY"
+    TRANSFER = "TRANSFER"
+    ADJUSTMENT = "ADJUSTMENT"
+
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True)
+    full_name = Column(String)
+    role = Column(String, default="staff") # manager, staff
+
+class Warehouse(Base):
+    __tablename__ = "warehouses"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, index=True)
+    location = Column(String)
+    
+    inventory = relationship("Inventory", back_populates="warehouse")
+
+class Product(Base):
+    __tablename__ = "products"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    sku = Column(String, unique=True, index=True)
+    category = Column(String, index=True)
+    unit_of_measure = Column(String)
+    
+    inventory = relationship("Inventory", back_populates="product")
+    transactions = relationship("Transaction", back_populates="product")
+
+class Inventory(Base):
+    __tablename__ = "inventory"
+    id = Column(Integer, primary_key=True, index=True)
+    product_id = Column(Integer, ForeignKey("products.id"))
+    warehouse_id = Column(Integer, ForeignKey("warehouses.id"))
+    quantity = Column(Float, default=0.0)
+    
+    product = relationship("Product", back_populates="inventory")
+    warehouse = relationship("Warehouse", back_populates="inventory")
+
+class Transaction(Base):
+    __tablename__ = "transactions"
+    id = Column(Integer, primary_key=True, index=True)
+    product_id = Column(Integer, ForeignKey("products.id"))
+    from_warehouse_id = Column(Integer, ForeignKey("warehouses.id"), nullable=True)
+    to_warehouse_id = Column(Integer, ForeignKey("warehouses.id"), nullable=True)
+    quantity = Column(Float)
+    type = Column(Enum(TransactionType))
+    status = Column(String, default="DONE") # DRAFT, DONE
+    timestamp = Column(DateTime(timezone=True), server_default=func.now())
+    
+    product = relationship("Product", back_populates="transactions")

@@ -1,5 +1,5 @@
 import { Link, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Package, ArrowRightLeft } from 'lucide-react';
+import { LayoutDashboard, Package, ArrowRightLeft, UserPlus } from 'lucide-react';
 
 const Layout = () => {
   return (
@@ -22,6 +22,10 @@ const Layout = () => {
           <Link to="/operations" className="flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">
             <ArrowRightLeft className="w-5 h-5 mr-3" />
             Operations
+          </Link>
+          <Link to="/register" className="flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+            <UserPlus className="w-5 h-5 mr-3" />
+            Register
           </Link>
         </nav>
       </aside>

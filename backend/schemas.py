@@ -1,16 +1,24 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
 
 # User Schemas
+class UserRegister(BaseModel):
+    email: str
+    full_name: str
+
+class VerifyOTP(BaseModel):
+    email: str
+    otp: str
+
 class UserCreate(BaseModel):
-    email: EmailStr
+    email: str
     password: str
     full_name: str
     role: Optional[str] = "staff"
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    email: str
     password: str
 
 class UserResponse(BaseModel):
@@ -24,10 +32,10 @@ class Token(BaseModel):
     user: UserResponse
 
 class ForgotPassword(BaseModel):
-    email: EmailStr
+    email: str
 
 class ResetPassword(BaseModel):
-    email: EmailStr
+    email: str
     otp: str
     new_password: str
 

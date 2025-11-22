@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from pathlib import Path
-from starlette.middleware.sessions import SessionMiddleware
 import os
 import sys
 
@@ -25,24 +24,10 @@ seed_database()
 
 app = FastAPI(title="StockMaster API", description="Inventory Management System Backend")
 
-# Production CORS Configuration
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
-
-# Allow both production and development URLs
-origins = [
-    FRONTEND_URL,
-    "http://localhost:5173",
-    "http://localhost:5174",
-    "http://localhost:3000",
-]
-
-# In production, allow all origins for easier deployment
-if os.getenv("ENVIRONMENT") == "production":
-    origins = ["*"]
-
+# CORS Configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -56,10 +41,7 @@ def read_root():
 def health_check():
     return {"status": "healthy"}
 
-# Add Session Middleware for Authlib
-app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY", "secret"))
-
-app.include_router(auth.router)
 app.include_router(products.router)
 app.include_router(warehouses.router)
 app.include_router(operations.router)
+app.include_router(auth.router)

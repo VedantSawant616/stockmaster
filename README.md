@@ -240,4 +240,8 @@ stockmaster/
 - Arav Palsule ([@palsulearav](https://github.com/palsulearavapsit))
 ---
 
+## Video Link
+
+https://youtu.be/0y9STHuGJKE?si=Lv70D3GFzXokUo6i
+
 **Happy Inventory Managing! 📦✨**
